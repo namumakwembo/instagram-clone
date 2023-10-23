@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Post;
+namespace App\Livewire\Post\View;
 
 use App\Models\Comment;
 use App\Models\Post;
@@ -12,20 +12,13 @@ class Item extends Component
     public Post $post;
 
     public $body;
-
+    public $parent_id=null;
 
     function togglePostLike()  {
 
         abort_unless(auth()->check(),401);
 
         auth()->user()->toggleLike($this->post);        
-    }
-
-
-    function toggleFavorite()  {
-
-        abort_unless(auth()->check(),401);
-        auth()->user()->toggleFavorite($this->post);        
     }
 
     function toggleCommentLike(Comment $comment)  {
@@ -35,9 +28,6 @@ class Item extends Component
         auth()->user()->toggleLike($comment);        
     }
 
-
-
-
     function addComment()  {
 
         $this->validate(['body'=>'required']);
@@ -45,6 +35,7 @@ class Item extends Component
         #create comment 
         Comment::create([
             'body'=>$this->body,
+            'parent_id'=>$this->parent_id,
             'commentable_id'=>$this->post->id,
             'commentable_type'=>Post::class,
             'user_id'=>auth()->id(),
@@ -57,8 +48,17 @@ class Item extends Component
     }
 
 
+    function setParent(Comment $comment)  {
+
+        $this->parent_id=$comment->id;
+        $this->body="@".$comment->user->name;
+        
+    }
+
     public function render()
     {
-        return view('livewire.post.item');
+
+        $comments = $this->post->comments()->whereDoesntHave('parent')->get();
+        return view('livewire.post.view.item',['comments'=>$comments]);
     }
 }

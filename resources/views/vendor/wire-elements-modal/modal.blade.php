@@ -16,6 +16,7 @@
     >
         <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-10 text-center sm:block sm:p-0">
             <div
+                    onclick="Livewire.dispatch('closeModal')"
                     x-show="show"
                     x-on:click="closeModalOnClickAway()"
                     x-transition:enter="ease-out duration-300"
