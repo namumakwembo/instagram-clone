@@ -14,6 +14,7 @@
         "overtrue/laravel-favorite": "^5.1",
         "overtrue/laravel-follow": "^5.1",
         "overtrue/laravel-like": "^5.2",
+        "pusher/pusher-php-server": "^7.2",
         "wire-elements/modal": "^2.0"
     },
     "require-dev": {

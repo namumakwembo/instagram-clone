@@ -50,7 +50,7 @@
 
             {{-- Actions --}}
             <section class="grid grid-cols-12 gap-3">
-                <span class="col-span-11 text-lg lg:col-span-5 font-medium">
+                <span class="col-span-11 text-lg lg:col-span-5 truncate font-medium">
                     {{$user->username}}
                 </span>
 
@@ -100,7 +100,7 @@
                     @endif
 
                     {{-- Send message button --}}
-                    <button type="button"
+                    <button wire:click="message({{$user->id}})" type="button"
                         class=" inline-flex justify-center font-bold items-center  rounded-lg  text-sm p-1.5 px-2 transition  bg-gray-200 hover:bg-slate-100 ">
                         Massage
                     </button>

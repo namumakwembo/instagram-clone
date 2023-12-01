@@ -28,10 +28,11 @@
               {{-- <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden">Open drawer</label> --}}
                 {{$slot}}
             </div> 
-            <div class="drawer-side">
+            <div class="drawer-side overflow-visible z-10">
               <label for="my-drawer-2" class="drawer-overlay"></label> 
             
-              @include('layouts.sidebar')
+              {{-- @include('layouts.sidebar') --}}
+              <livewire:components.sidebar />
             
             </div>
           </div>

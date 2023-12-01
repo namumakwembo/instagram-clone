@@ -1,5 +1,8 @@
 @props([
-    'source'=>'https://cdn.devdojo.com/pines/videos/coast.mp4'
+    'source'=>'https://cdn.devdojo.com/pines/videos/coast.mp4',
+    'controls'=>true,
+    'cover'=>false,
+
 ])
 
 
@@ -10,11 +13,14 @@
 >
 
 
-        <video x-ref="player" @play="playing=true" @pause="playing=false" class=" h-full max-h-[500px] w-full">
+        <video x-ref="player" @play="playing=true" @pause="playing=false"
+              class=" h-full max-h-[800px] w-full m-auto {{$cover==true?'object-cover':''}}">
             <source src="{{$source}}" type="video/mp4">
             your browser does not support html5 video 
         </video>
 
+        @if ($controls==true)
+            
 
         {{-- play --}}
 
@@ -55,5 +61,7 @@
 
 
         </div>
+        @endif
+
 
 </div>
