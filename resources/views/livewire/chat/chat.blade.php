@@ -1,4 +1,35 @@
-<div class=" w-full overflow-hidden  h-full ">
+<div 
+ x-data="{
+    height:0,
+    conversationElement: document.getElementById('conversation'),
+ }"
+
+ x-init="
+    height=conversationElement.scrollHeight;
+    $nextTick(()=> conversationElement.scrollTop=height);
+
+    Echo.private('users.{{auth()->user()->id}}')
+    .notification((notification) => {
+
+        if(
+            notification['type']=='App\\Notifications\\MessageSentNotification' &&
+            notification['conversation_id']=={{$conversation->id}}
+        )
+        {
+
+            $wire.listenBroadcastedMessage(notification);
+        }
+     
+    });
+ "
+
+ @scroll-bottom.window="
+ $nextTick(()=> conversationElement.scrollTop= conversationElement.scrollHeight );
+ 
+ "
+
+
+class=" w-full overflow-hidden  h-full ">
 
     <div class="  border-r   flex flex-col overflow-y-scroll grow  h-full">
         {{--------------}}
@@ -9,8 +40,7 @@
 
             <div class="  flex  w-full items-center   px-2   lg:px-4 gap-2 md:gap-5 ">
                 {{-- Return --}}
-
-                <a href="#" class=" shrink-0 lg:hidden  dark:text-white" id="chatReturn">
+                <a href="{{route('chat')}}" class=" shrink-0 lg:hidden  dark:text-white" id="chatReturn">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -19,10 +49,14 @@
 
                 {{--Avatar --}}
                 <div class=" shrink-0 ">
-                        <x-avatar  class="h-8 w-8 lg:w-10 lg:h-10 " />
+                    <a href="{{route('profile.home',$receiver->username)}}">
+                        <x-avatar wire:ignore  class="h-8 w-8 lg:w-10 lg:h-10 " />
+                    </a>
+                 
                 </div>
-
-                <h6 class="font-bold truncate"> {{fake()->name()}} </h6>
+                <a href="{{route('profile.home',$receiver->username)}}">
+                  <h6 class="font-bold truncate"> {{$receiver->name}} </h6>
+                </a>
 
                 {{-- Actions --}}
                 <div class="flex gap-4 items-center ml-auto">
@@ -57,64 +91,72 @@
         {{--------------}}
         {{---Messages---}}
         {{--------------}}
-        <main class="flex flex-col   gap-5   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto ">
+        <main 
+
+        @scroll="
+         scrollTop= $el.scrollTop;
+         console.log(scrollTop);
+         if(scrollTop<=0){
+            @this.dispatch('loadMore');
+         }
+        
+        "
+
+        @update-height.window="
+            $nextTick(()=>{
+
+                newHeight=$el.scrollHeight;
+
+                oldHeight= height;
+
+                $el.scrollTop=newHeight-oldHeight;
+
+                height=newHeight;
+
+
+
+            });
+        
+        "
+
+        id="conversation"
+        class="flex flex-col   gap-5   p-2.5  overflow-y-auto flex-grow  overscroll-contain overflow-x-hidden w-full my-auto ">
 
             <!--Message-->
            
+            @foreach ($loadedMessages as $message)
+
+            @php
+                $belongsToAuth= $message->sender_id==auth()->id();
+            @endphp
+                
                 <div @class([
                     'max-w-[85%] md:max-w-[78%] flex  w-auto  gap-2 relative mt-2',
-                    'ml-auto'=>false// SET true if belongs to auth
+                    'ml-auto'=>$belongsToAuth// SET true if belongs to auth
                      ])>
                     {{-- Avatar --}}
                     <div @class([
                         'shrink-0',
-                         'invisible'=>false //SET true if belongs to auth
+                         'invisible'=>$belongsToAuth //SET true if belongs to auth
                         ])>
                         <x-avatar class="h-7 w-7 lg:w-11 lg:h-11 " src="https://source.unsplash.com/1600x900/?face" />
                     </div>
 
                     {{-- message body --}}
                     <div @class(['flex  flex-wrap text-[15px] border border-gray-200/40 rounded-xl p-2.5 flex flex-col text-black bg-[#f6f6f8fb]',
-                                 'bg-blue-500/80 text-white'=> false,//SET true if belongs to auth
+                                 'bg-blue-500/80 text-white'=> $belongsToAuth,//SET true if belongs to auth
                                 ])
                                 >
 
                         <p class="  whitespace-normal truncate text-sm md:text-base  tracking-wide lg:tracking-normal ">
-                             Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore quam asperiores rerum ab alias, doloribus pariatur exercitationem facilis voluptatum quis atque laudantium quae iusto voluptatibus rem explicabo maiores excepturi aut! exercitationem facilis voluptatum quis atque laudantium quae iusto voluptatibus rem explicabo maiores excepturi aut! exercitationem facilis voluptatum quis atque laudantium quae iusto voluptatibus rem explicabo maiores excepturi aut! 
+                            {{$message->body}}
                         </p>
                    
                     </div>
 
                 </div>
  
-             
- 
-                <div @class([
-                    'max-w-[85%] md:max-w-[78%] flex  w-auto  gap-2 relative mt-2',
-                    'ml-auto'=>true// SET true if belongs to auth
-                     ])>
-                    {{-- Avatar --}}
-                    <div @class([
-                        'shrink-0',
-                         'invisible'=>true //SET true if belongs to auth
-                        ])>
-                        <x-avatar class="h-7 w-7 lg:w-11 lg:h-11 " src="https://source.unsplash.com/1600x900/?face" />
-                    </div>
-
-                    {{-- message body --}}
-                    <div @class(['flex  flex-wrap text-[15px] rounded-xl p-2.5 flex border  border-gray-200/40 flex-col text-black bg-[#f6f6f8fb]',
-                                 'bg-blue-500/80 text-white'=> true,//Message belongs to auth
-                                ])
-                                >
-
-                        <p class="  whitespace-normal truncate text-sm md:text-base  tracking-wide lg:tracking-normal ">
-                             Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolore quam asperiores rerum ab alias, doloribus pariatur exercitationem facilis voluptatum quis atque laudantium quae iusto voluptatibus rem explicabo maiores excepturi aut! exercitationem facilis voluptatum quis atque laudantium quae iusto voluptatibus rem explicabo maiores excepturi aut! exercitationem facilis voluptatum quis atque laudantium quae iusto voluptatibus rem explicabo maiores excepturi aut! 
-                        </p>
-                   
-                    </div>
-
-                </div>
- 
+                @endforeach
 
         </main>
         
@@ -133,11 +175,11 @@
                     </svg>      
                 </span>
                 
-                <form  method="POST" autocapitalize="off" class="col-span-11 md:col-span-9 ">
+                <form  wire:submit='sendMessage' method="POST" autocapitalize="off" class="col-span-11 md:col-span-9 ">
                     @csrf
                     <input type="hidden" autocomplete="false" style="display: none">
                     <div class="grid grid-cols-12">
-                        <input autocomplete="off" wire:model.defer='body' id="sendMessage"
+                        <input autocomplete="off" wire:model='body' id="sendMessage"
                             autofocus type="text" name="message"
                             placeholder="Message" maxlength="1700"
                             class="col-span-10  border-0  outline-0 focus:border-0 focus:ring-0  hover:ring-0 rounded-lg   dark:text-gray-300     focus:outline-none   " />

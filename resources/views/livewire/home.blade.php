@@ -75,7 +75,7 @@
 
           @for ($i = 0; $i < 10; $i++) <li class="flex flex-col justify-center w-20 gap-1 p-2">
             <x-avatar wire:ignore story src="https://source.unsplash.com/500x500?face-{{$i}}" class="h-14 w-14" />
-            <p class="text-xs font-medium truncate"> {{fake()->name}} </p>
+            <p class="text-xs font-medium truncate" wire:ignore> {{fake()->name}} </p>
             </li>
             @endfor
         </ul>
@@ -112,7 +112,7 @@
       <div class="flex items-center gap-2">
 
         <x-avatar wire:ignore src="https://source.unsplash.com/500x500?face" class="w-12 h-12" />
-        <h4 class="font-medium">{{fake()->name}} </h4>
+        <h4 class="font-medium" wire:ignore>{{fake()->name}} </h4>
 
       </div>
 

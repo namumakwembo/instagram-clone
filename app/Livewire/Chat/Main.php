@@ -2,10 +2,37 @@
 
 namespace App\Livewire\Chat;
 
+use App\Models\Conversation;
+use App\Models\Message;
 use Livewire\Component;
 
 class Main extends Component
 {
+
+
+  public $chat;
+
+  public $conversation;
+
+
+
+  function mount()  {
+
+
+    $this->conversation= Conversation::findOrFail($this->chat);
+
+
+    #mark messages belonging to receiver as read
+
+    Message::where('conversation_id',$this->conversation->id)
+             ->where('receiver_id',auth()->id())
+             ->whereNull('read_at')
+             ->update(['read_at'=>now()]);
+    
+  }
+
+
+
     public function render()
     {
         return <<<'HTML'
@@ -24,7 +51,7 @@ class Main extends Component
 
               <!-- chat component  -->
                
-              <livewire:chat.chat />
+              <livewire:chat.chat :conversation="$conversation" />
 
             </main>
 
